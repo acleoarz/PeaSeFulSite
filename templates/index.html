@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PeaSeFul the NET</title>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(#cfe9f2,#87c6d8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.container{
+    background:white;
+    width:90%;
+    max-width:420px;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    text-align:center;
+}
+button{
+    width:100%;
+    padding:15px;
+    margin:8px 0;
+    border:none;
+    border-radius:15px;
+    font-size:16px;
+    cursor:pointer;
+    background:#f0f0f0;
+}
+button:hover{
+    background:#e0e0e0;
+}
+.hidden{
+    display:none;
+}
+input{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    margin-bottom:10px;
+}
+#messages{
+    height:200px;
+    overflow-y:auto;
+    border:1px solid #ccc;
+    border-radius:10px;
+    padding:5px;
+    margin-bottom:10px;
+    text-align:left;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ГЛАВНАЯ -->
+<div id="home">
+<h1>PeaSeFul the NET</h1>
+<p>Свобода / Открытость / Доступ</p>
+
+<button onclick="openSearch()">🔎 Поисковик</button>
+<button onclick="openChat()">💬 Мессенджер</button>
+<button onclick="openTeam()">👥 Команда</button>
+</div>
+
+<!-- ПОИСК -->
+<div id="search" class="hidden">
+<h2>Поиск</h2>
+<input id="query" placeholder="Введите запрос">
+<button onclick="doSearch()">Искать</button>
+<button onclick="goHome()">Назад</button>
+</div>
+
+<!-- ЧАТ -->
+<div id="chat" class="hidden">
+<h2>Live Chat</h2>
+
+<input id="nickname" placeholder="Ваш ник">
+<div id="messages"></div>
+<input id="msg" placeholder="Сообщение">
+<button onclick="sendMessage()">Отправить</button>
+<button onclick="goHome()">Назад</button>
+</div>
+
+<!-- КОМАНДА -->
+<div id="team" class="hidden">
+<h2>Команда</h2>
+<p>PeaSeFul the NET</p>
+<p>Мы не храним сообщения.</p>
+<p>Мы не используем трекеры.</p>
+<button onclick="goHome()">Назад</button>
+</div>
+
+</div>
+
+<script>
+const socket = io();
+
+// Переключение экранов
+function hideAll(){
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("search").classList.add("hidden");
+    document.getElementById("chat").classList.add("hidden");
+    document.getElementById("team").classList.add("hidden");
+}
+
+function goHome(){ hideAll(); document.getElementById("home").classList.remove("hidden"); }
+function openSearch(){ hideAll(); document.getElementById("search").classList.remove("hidden"); }
+function openChat(){ hideAll(); document.getElementById("chat").classList.remove("hidden"); }
+function openTeam(){ hideAll(); document.getElementById("team").classList.remove("hidden"); }
+
+// Поиск
+function doSearch(){
+    let q = document.getElementById("query").value;
+    if(q){
+        window.open("https://duckduckgo.com/?q=" + encodeURIComponent(q), "_blank");
+    }
+}
+
+// Чат
+socket.on("message", function(data){
+    const box = document.getElementById("messages");
+    box.innerHTML += "<div><b>"+data.nick+":</b> "+data.text+"</div>";
+    box.scrollTop = box.scrollHeight;
+});
+
+function sendMessage(){
+    const nick = document.getElementById("nickname").value || "Anon";
+    const text = document.getElementById("msg").value;
+
+    if(text){
+        socket.send({nick:nick, text:text});
+        document.getElementById("msg").value="";
+    }
+}
+</script>
+
+</body>
+  </html>
